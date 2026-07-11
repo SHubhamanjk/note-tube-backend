@@ -1,0 +1,15 @@
+fastapi>=0.100.0
+uvicorn[standard]>=0.22.0
+pymongo>=4.5.0
+pydantic-settings>=2.0.0
+passlib[bcrypt]>=1.7.4
+bcrypt==3.2.2
+PyJWT>=2.8.0
+pytz>=2023.3
+email-validator>=2.0.0
+google-cloud-storage>=2.10.0
+python-multipart>=0.0.6
+httpx>=0.24.0
+groq>=0.4.2
+google-genai>=0.2.2
+youtube-transcript-api>=0.6.2
