@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str
     JWT_REFRESH_SECRET: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
-    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7 # 7 days
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 60 # 60 days
     
     # Email / SMTP
     SMTP_FROM_EMAIL: EmailStr
