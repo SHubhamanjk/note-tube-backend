@@ -3,6 +3,7 @@ from bson import ObjectId
 from core.database import get_note_collection, get_tutorial_collection, get_group_collection, get_subgroup_collection
 from core.utils import get_ist_now
 from api.notes import schemas
+from api.notes.pdf_generator import generate_notes_pdf_bytes
 from api.auth.service import increment_user_counters
 from typing import List, Optional
 
@@ -145,3 +146,28 @@ async def get_notes_by_tutorial(user_id: str, tutorial_id: str, skip: int = 0, l
         "meta": {"total": total, "skip": skip, "limit": limit},
         "data": data
     }
+
+async def download_notes_pdf(user_id: str, tutorial_id: str) -> dict:
+    print(f"[Notes] Generating PDF for tutorial {tutorial_id}, user {user_id}")
+    tutorial = await verify_tutorial_ownership(user_id, tutorial_id)
+    notes_coll = get_note_collection()
+    
+    # Fetch all notes sorted chronologically (oldest to newest)
+    cursor = notes_coll.find({"tutorial_id": tutorial_id}).sort("created_at", 1)
+    note_docs = await cursor.to_list(length=None)
+    
+    # Format notes list for PDF generator
+    pdf_notes = []
+    for n in note_docs:
+        pdf_notes.append({
+            "timestamp": n.get("timestamp", "0:00"),
+            "note_content": n.get("note_content", ""),
+            "media_urls": n.get("media", [])
+        })
+        
+    pdf_bytes = generate_notes_pdf_bytes(tutorial.get("title", "Tutorial Notes"), pdf_notes)
+    
+    # Sanitize title for filename
+    safe_title = "".join([c for c in tutorial.get("title", "NoteTube") if c.isalpha() or c.isdigit() or c==' ']).rstrip()
+    
+    return pdf_bytes, safe_title

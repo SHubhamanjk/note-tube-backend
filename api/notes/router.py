@@ -1,4 +1,5 @@
-from fastapi import APIRouter, status, Depends, Query, File, UploadFile, Form, HTTPException, BackgroundTasks
+import urllib.parse
+from fastapi import APIRouter, status, Depends, Query, File, UploadFile, Form, HTTPException, BackgroundTasks, Response
 from typing import List, Optional
 from api.notes import schemas, service
 from core.dependencies import get_current_user
@@ -90,3 +91,18 @@ async def get_notes_by_tutorial(
 ):
     user_id = str(current_user["_id"])
     return await service.get_notes_by_tutorial(user_id, tutorial_id, skip, limit)
+
+@router.get("/tutorial/{tutorial_id}/download", response_class=Response, status_code=status.HTTP_200_OK)
+async def download_notes_pdf(
+    tutorial_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    user_id = str(current_user["_id"])
+    pdf_bytes, title = await service.download_notes_pdf(user_id, tutorial_id)
+    
+    encoded_filename = urllib.parse.quote(f"{title}_notes.pdf")
+    headers = {
+        'Content-Disposition': f"attachment; filename*=utf-8''{encoded_filename}"
+    }
+    
+    return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)

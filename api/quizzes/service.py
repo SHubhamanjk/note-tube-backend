@@ -49,6 +49,10 @@ async def generate_quiz(user_id: str, tutorial_id: str, background_tasks: Backgr
     notes_coll = get_note_collection()
     quizzes_coll = get_quiz_collection()
     
+    existing_count = await quizzes_coll.count_documents({"tutorial_id": tutorial_id})
+    if existing_count >= 2:
+        raise HTTPException(status_code=403, detail="Maximum limit of 2 quizzes per tutorial reached.")
+    
     # Context gathering
     context_parts = []
     context_parts.append(f"Tutorial: {tutorial.get('title', 'Unknown')}")

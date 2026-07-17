@@ -13,10 +13,10 @@ This is the lightweight backend for the **Note Tube** browser extension, which h
 
 - **Authentication (`/auth`)**: User registration, OTP-based login, password reset, token refreshing, and profile stats.
 - **Tutorials (`/tutorials`)**: Manage video tutorial sessions, sync YouTube videos with the user's workspace.
-- **Notes (`/notes`)**: Timestamped note-taking with support for multiple image attachments per note.
+- **Notes (`/notes`)**: Timestamped note-taking with support for multiple image attachments per note, plus a high-performance PDF export endpoint (`/download`).
 - **Groups & Subgroups (`/groups`)**: Organize tutorials into folders/collections.
 - **Chats (`/chats`)**: AI Chat Assistant that answers questions about the video content contextually.
-- **Quizzes (`/quizzes`)**: AI-generated interactive quizzes (MCQs and Descriptive) with automated scoring and detailed performance analysis based on the tutorial transcript.
+- **Quizzes (`/quizzes`)**: AI-generated interactive quizzes (MCQs and Descriptive) with automated scoring and detailed performance analysis based on the tutorial transcript (limited to 2 quizzes per tutorial to manage LLM compute costs).
 - **Utilities (`/utils`)**: AI-powered text rewriting ("Enhance with AI") and Speech-to-Text (STT) for voice notes.
 
 ## Setup Instructions
