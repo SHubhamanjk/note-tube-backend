@@ -66,7 +66,8 @@ async def create_tutorial(user_id: str, tutorial_in: schemas.TutorialCreate, bac
         "updated_at": get_ist_now(),
         "number_of_notes": 0,
         "group_id": tutorial_in.group_id,
-        "subgroup_id": tutorial_in.subgroup_id
+        "subgroup_id": tutorial_in.subgroup_id,
+        "transcript": [t.model_dump() for t in tutorial_in.transcript] if tutorial_in.transcript else None
     }
     
     result = await tutorials.insert_one(tutorial_dict)

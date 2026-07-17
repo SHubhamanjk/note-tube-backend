@@ -4,11 +4,18 @@ from datetime import datetime
 from api.groups.schemas import PaginationMeta
 from datetime import datetime
 
+class TranscriptSegment(BaseModel):
+    text: str
+    offset: float
+    duration: float
+    lang: Optional[str] = None
+
 class TutorialCreate(BaseModel):
     url: HttpUrl
     title: str
     group_id: Optional[str] = None
     subgroup_id: Optional[str] = None
+    transcript: Optional[List[TranscriptSegment]] = None
 class TutorialUpdate(BaseModel):
     title: Optional[str] = None
     group_id: Optional[str] = None

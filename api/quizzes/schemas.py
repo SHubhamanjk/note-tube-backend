@@ -7,11 +7,12 @@ class QuizQuestion(BaseModel):
     options: List[str]
     answer: str
     type: str = "mcq" # can be "mcq" or "descriptive"
+    explanation: Optional[str] = None
 
 class QuestionFeedback(BaseModel):
     question_id: int
     is_correct: bool
-    correct_answer: str
+    correct_answer: Optional[str] = None
     feedback: str
     score: int # usually 0 or 1 for mcq, 0-10 for descriptive
 
@@ -19,7 +20,7 @@ class QuizEvaluationResponse(BaseModel):
     total_score: int
     max_score: int
     feedback: List[QuestionFeedback]
-    overall_analysis: str
+    overall_analysis: Optional[str] = None
 
 class QuizAnswer(BaseModel):
     question_id: int

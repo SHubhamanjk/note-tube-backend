@@ -49,11 +49,27 @@ async def process_chat(user_id: str, tutorial_id: str, message: str, current_tim
     notes_cursor = notes_coll.find({"tutorial_id": tutorial_id, "user_id": user_id}).sort("created_at", 1)
     notes_list = await notes_cursor.to_list(length=None)
     
-    # 3. Build Context
     context_parts = []
     context_parts.append(f"Tutorial: {tutorial.get('title', 'Unknown')}")
     url = tutorial.get('url', 'Unknown')
     context_parts.append(f"Link: {url}")
+    
+    # 3a. Add Transcript context if available
+    transcript = tutorial.get('transcript')
+    if transcript and current_timestamp is not None:
+        start_window = max(0, (current_timestamp - 600) * 1000)
+        end_window = (current_timestamp + 600) * 1000
+        
+        relevant_segments = [
+            seg for seg in transcript 
+            if (seg.get('offset', 0) >= start_window and seg.get('offset', 0) <= end_window)
+        ]
+        
+        if relevant_segments:
+            context_parts.append("\nVideo Transcript (near current timestamp):")
+            transcript_text = " ".join([seg.get('text', '') for seg in relevant_segments])
+            context_parts.append(transcript_text)
+            
     if notes_list:
         context_parts.append("\nNotes from the tutorial:")
         for note in notes_list:

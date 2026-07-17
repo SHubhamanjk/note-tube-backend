@@ -1,6 +1,6 @@
 # Note Tube Backend
 
-This is the lightweight backend for the **Note Tube** browser extension, which helps you take smart notes and chat with an AI assistant while watching YouTube videos, so you don't need to juggle between multiple tabs to do this.
+This is the lightweight backend for the **Note Tube** browser extension, which helps you take smart notes, chat with an AI assistant, and take auto-generated interactive quizzes while watching YouTube videos, so you don't need to juggle between multiple tabs to do this.
 
 ## Tech Stack
 - **Framework:** FastAPI (Python)
@@ -16,6 +16,7 @@ This is the lightweight backend for the **Note Tube** browser extension, which h
 - **Notes (`/notes`)**: Timestamped note-taking with support for multiple image attachments per note.
 - **Groups & Subgroups (`/groups`)**: Organize tutorials into folders/collections.
 - **Chats (`/chats`)**: AI Chat Assistant that answers questions about the video content contextually.
+- **Quizzes (`/quizzes`)**: AI-generated interactive quizzes (MCQs and Descriptive) with automated scoring and detailed performance analysis based on the tutorial transcript.
 - **Utilities (`/utils`)**: AI-powered text rewriting ("Enhance with AI") and Speech-to-Text (STT) for voice notes.
 
 ## Setup Instructions

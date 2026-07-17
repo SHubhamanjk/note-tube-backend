@@ -8,11 +8,13 @@ router = APIRouter(prefix="/quizzes", tags=["Quizzes"])
 async def generate_quiz(
     tutorial_id: str,
     background_tasks: BackgroundTasks,
+    from_timestamp: str = Query(None, description="Start timestamp e.g. 5:00"),
+    to_timestamp: str = Query(None, description="End timestamp e.g. 10:00"),
     current_user: dict = Depends(get_current_user)
 ):
     """Generate a dynamic quiz for a tutorial based on its video transcript and notes."""
     user_id = str(current_user["_id"])
-    return await service.generate_quiz(user_id, tutorial_id, background_tasks)
+    return await service.generate_quiz(user_id, tutorial_id, background_tasks, from_timestamp, to_timestamp)
 
 @router.post("/{quiz_id}/evaluate", response_model=schemas.QuizEvaluationResponse, status_code=status.HTTP_200_OK)
 async def evaluate_quiz(

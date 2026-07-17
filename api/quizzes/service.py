@@ -4,7 +4,7 @@ from bson import ObjectId
 from core.database import get_quiz_collection, get_tutorial_collection, get_note_collection
 from core.utils import get_ist_now
 from core.llm import chat_completion_with_fallback
-from core.prompts import QUIZ_GENERATION_PROMPT, QUIZ_EVALUATION_PROMPT
+from core.prompts import QUIZ_GENERATION_PROMPT
 from api.tutorials.service import increment_counters
 from fastapi import BackgroundTasks
 
@@ -32,7 +32,18 @@ def clean_json_response(response: str) -> str:
         response = response[:-3]
     return response.strip()
 
-async def generate_quiz(user_id: str, tutorial_id: str, background_tasks: BackgroundTasks) -> dict:
+def time_to_ms(t_str: str) -> float:
+    if not t_str: return 0
+    parts = str(t_str).split(':')
+    try:
+        parts = [int(p) for p in parts]
+    except:
+        return 0
+    if len(parts) == 2: return (parts[0] * 60 + parts[1]) * 1000
+    if len(parts) == 3: return (parts[0] * 3600 + parts[1] * 60 + parts[2]) * 1000
+    return 0
+
+async def generate_quiz(user_id: str, tutorial_id: str, background_tasks: BackgroundTasks, from_timestamp: str = None, to_timestamp: str = None) -> dict:
     print(f"[Quizzes] Starting quiz generation for tutorial {tutorial_id} by user {user_id}")
     tutorial = await verify_tutorial_ownership(user_id, tutorial_id)
     notes_coll = get_note_collection()
@@ -44,12 +55,18 @@ async def generate_quiz(user_id: str, tutorial_id: str, background_tasks: Backgr
     
     transcript = tutorial.get('transcript')
     if transcript:
-        # Assuming the transcript is a list of dicts stored in cache
         if isinstance(transcript, list):
-            full_text = " ".join([t['text'] for t in transcript])
-            transcript_text = full_text[:15000]
+            start_ms = time_to_ms(from_timestamp) if from_timestamp else 0
+            end_ms = time_to_ms(to_timestamp) if to_timestamp else float('inf')
+            
+            filtered_transcript = [
+                t for t in transcript
+                if (t.get('offset', 0) >= start_ms and t.get('offset', 0) <= end_ms)
+            ]
+            full_text = " ".join([t['text'] for t in filtered_transcript])
+            transcript_text = full_text[:45000]
         else:
-            transcript_text = str(transcript)[:15000]
+            transcript_text = str(transcript)[:45000]
         context_parts.append(f"\nTranscript Excerpt:\n{transcript_text}\n")
         
     notes_cursor = notes_coll.find({"tutorial_id": tutorial_id, "user_id": user_id}).sort("created_at", 1)
@@ -110,7 +127,7 @@ async def generate_quiz(user_id: str, tutorial_id: str, background_tasks: Backgr
     return quiz_doc
 
 async def evaluate_quiz(user_id: str, quiz_id: str, answers: list) -> dict:
-    print(f"[Quizzes] Evaluating quiz {quiz_id} for user {user_id}")
+    print(f"[Quizzes] Evaluating quiz {quiz_id} for user {user_id} natively")
     quizzes = get_quiz_collection()
     try:
         obj_id = ObjectId(quiz_id)
@@ -121,28 +138,50 @@ async def evaluate_quiz(user_id: str, quiz_id: str, answers: list) -> dict:
     if not quiz:
         raise HTTPException(status_code=404, detail="Quiz not found")
         
-    if quiz.get("status") == "completed":
-        # Already evaluated, just return the existing evaluation if needed, but for simplicity let's re-eval or block
-        # Usually we want to return the evaluation data. 
-        pass
+    questions = quiz.get("questions", [])
+    
+    total_score = 0
+    max_score = 0
+    feedback_list = []
+    
+    # answers looks like: [{"question_id": 1, "answer": "Option B"}]
+    answers_dict = {a.get("question_id"): a.get("answer") for a in answers}
+    
+    for q in questions:
+        q_id = q.get("id")
+        q_type = q.get("type", "mcq")
+        correct_answer = q.get("answer", "")
+        explanation = q.get("explanation", "")
         
-    user_prompt = "Original Quiz:\n" + json.dumps(quiz["questions"], indent=2) + "\n\nStudent Answers:\n" + json.dumps(answers, indent=2)
-    
-    print(f"[Quizzes] Calling LLM orchestrator for quiz evaluation")
-    response_text = await chat_completion_with_fallback(
-        messages=[{"role": "user", "content": user_prompt}],
-        system_instruction=QUIZ_EVALUATION_PROMPT
-    )
-    
-    print(f"[Quizzes] Received LLM response for evaluation, length: {len(response_text)}")
-    cleaned_json = clean_json_response(response_text)
-    
-    try:
-        evaluation = json.loads(cleaned_json)
-    except Exception as e:
-        print(f"Failed to parse quiz evaluation: {e}\nRaw: {cleaned_json}")
-        raise HTTPException(status_code=500, detail="Failed to evaluate the quiz properly. Please try again.")
+        user_answer = answers_dict.get(q_id, "Not answered")
         
+        is_correct = False
+        score = 0
+        if q_type == "mcq":
+            max_score += 1
+            if user_answer == correct_answer:
+                is_correct = True
+                score = 1
+                total_score += 1
+        else:
+            # Descriptive questions don't contribute to the score, but we provide the explanation
+            is_correct = False
+            score = 0
+            
+        feedback_list.append({
+            "question_id": q_id,
+            "is_correct": is_correct,
+            "score": score,
+            "feedback": explanation
+        })
+        
+    evaluation = {
+        "total_score": total_score,
+        "max_score": max_score,
+        "overall_analysis": "Quiz completed successfully! Review your detailed feedback below.",
+        "feedback": feedback_list
+    }
+    
     # Save evaluation to db
     await quizzes.update_one(
         {"_id": obj_id},
