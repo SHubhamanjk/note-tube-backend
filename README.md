@@ -1,6 +1,6 @@
 # Note Tube Backend
 
-This is the backend API for **Note Tube**, an AI-powered tutorial companion that helps you take smart notes, chat with an AI assistant, and generate quizzes while watching YouTube videos.
+This is the backend API for **Note Tube**, an AI-powered tutorial companion that helps you take smart notes and chat with an AI assistant while watching YouTube videos.
 
 ## Tech Stack
 - **Framework:** FastAPI (Python)
@@ -23,9 +23,9 @@ This is the backend API for **Note Tube**, an AI-powered tutorial companion that
 ### Prerequisites
 - Python 3.10+
 - MongoDB instance (local or Atlas)
-- Google Gemini API Key
-- Cloudinary Account
-- Resend API Key (for OTP emails)
+- Google Gemini API Key and Groq API Key (for proper fallback)
+- Google Cloud Storage Service Account Key (for image/media uploads)
+- Gmail Account with App Password (for OTP emails)
 
 ### Installation
 

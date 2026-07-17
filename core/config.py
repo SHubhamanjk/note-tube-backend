@@ -3,6 +3,7 @@ from pydantic import EmailStr
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Note-Tube Backend"
+    ENVIRONMENT: str = "prod"
     
     # Database
     MONGO_URI: str

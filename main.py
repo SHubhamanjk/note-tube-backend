@@ -14,11 +14,16 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown logic (if any) can go here
 
+is_prod = settings.ENVIRONMENT.lower() == "prod"
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="Backend API for Note-Tube",
     version="1.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
+    docs_url=None if is_prod else "/docs",
+    redoc_url=None if is_prod else "/redoc",
+    openapi_url=None if is_prod else "/openapi.json"
 )
 
 # CORS middleware setup
