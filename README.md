@@ -1,6 +1,6 @@
 # Note Tube Backend
 
-This is the backend API for **Note Tube**, an AI-powered tutorial companion that helps you take smart notes and chat with an AI assistant while watching YouTube videos.
+This is the lightweight backend for the **Note Tube** browser extension, which helps you take smart notes and chat with an AI assistant while watching YouTube videos, so you don't need to juggle between multiple tabs to do this.
 
 ## Tech Stack
 - **Framework:** FastAPI (Python)
@@ -31,6 +31,7 @@ This is the backend API for **Note Tube**, an AI-powered tutorial companion that
 
 1. **Clone the repository and enter the directory:**
    ```bash
+   git clone https://github.com/SHubhamanjk/note-tube-backend.git
    cd note-tube-backend
    ```
 
@@ -57,8 +58,26 @@ This is the backend API for **Note Tube**, an AI-powered tutorial companion that
    ```
    The API will be running at `http://127.0.0.1:8000`. You can view the interactive Swagger documentation at `http://127.0.0.1:8000/docs`.
 
+6. **Set up the Frontend Extension:**
+   ```bash
+   git clone https://github.com/SHubhamanjk/note-tube-browser-extension-frontend.git
+   ```
+   - Open Google Chrome and go to `chrome://extensions/`.
+   - Enable **Developer mode** in the top right corner.
+   - Click **Load unpacked** and select the `note-tube-browser-extension-frontend` folder.
+
 ## Database Indexes
 Indexes for MongoDB (like email uniqueness, TTL for OTPs, and compound indexes) are automatically set up when the FastAPI application starts up via the lifespan event in `main.py`.
 
+
+## Frontend Repository
+You can find the frontend browser extension repository here:
+[Note Tube Browser Extension](https://github.com/SHubhamanjk/note-tube-browser-extension-frontend)
+
+## Collaboration
+Interested in collaborating or contributing? We'd love to have you!
+Connect with us at: **+91 8002007238**
+
 ## License
 MIT License
+

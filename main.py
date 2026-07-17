@@ -18,7 +18,7 @@ is_prod = settings.ENVIRONMENT.lower() == "prod"
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    description="Backend API for Note-Tube",
+    description="Lightweight backend for the Note Tube browser extension, which helps you take smart notes and chat with an AI assistant while watching YouTube videos.",
     version="1.0.0",
     lifespan=lifespan,
     docs_url=None if is_prod else "/docs",
