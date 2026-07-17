@@ -46,19 +46,6 @@ async def increment_counters(group_id: str = None, subgroup_id: str = None, inc_
             {"$inc": {"number_of_tutorials": inc_val}, "$set": {"last_updated": get_ist_now()}}
         )
 
-async def cache_transcript_background(tutorial_id: str, url: str):
-    """Background task to fetch and cache transcript immediately after tutorial creation."""
-    from api.chats.service import get_youtube_video_id, fetch_transcript
-    video_id = get_youtube_video_id(url)
-    if video_id:
-        transcript = fetch_transcript(video_id)
-        if transcript:
-            tutorials = get_tutorial_collection()
-            await tutorials.update_one(
-                {"_id": ObjectId(tutorial_id)},
-                {"$set": {"transcript": transcript}}
-            )
-
 async def create_tutorial(user_id: str, tutorial_in: schemas.TutorialCreate, background_tasks: BackgroundTasks):
     if tutorial_in.group_id == "general":
         tutorial_in.group_id = None
@@ -78,7 +65,6 @@ async def create_tutorial(user_id: str, tutorial_in: schemas.TutorialCreate, bac
         "created_at": get_ist_now(),
         "updated_at": get_ist_now(),
         "number_of_notes": 0,
-        "number_of_quizzes": 0,
         "group_id": tutorial_in.group_id,
         "subgroup_id": tutorial_in.subgroup_id
     }
@@ -92,9 +78,6 @@ async def create_tutorial(user_id: str, tutorial_in: schemas.TutorialCreate, bac
     # Increment group counts in background if assigned
     if tutorial_dict["group_id"]:
         background_tasks.add_task(increment_counters, tutorial_dict["group_id"], tutorial_dict.get("subgroup_id"), 1)
-    
-    # Cache transcript in background
-    background_tasks.add_task(cache_transcript_background, tutorial_dict["id"], str(tutorial_in.url))
     
     return tutorial_dict
 

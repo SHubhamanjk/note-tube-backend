@@ -34,9 +34,6 @@ def get_note_collection() -> AsyncCollection:
 def get_chat_collection() -> AsyncCollection:
     return db["chats"]
 
-def get_quiz_collection() -> AsyncCollection:
-    return db["quizzes"]
-
 async def setup_indexes():
     """Create necessary database indexes."""
     users_coll = get_user_collection()
@@ -72,8 +69,5 @@ async def setup_indexes():
     
     chats_coll = get_chat_collection()
     await chats_coll.create_index("tutorial_id")
-    
-    quizzes_coll = get_quiz_collection()
-    await quizzes_coll.create_index("tutorial_id")
     
     print("Database indexes setup completed.")

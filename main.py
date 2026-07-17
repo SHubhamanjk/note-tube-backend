@@ -8,8 +8,6 @@ from api.tutorials.router import router as tutorials_router
 from api.notes.router import router as notes_router
 from api.utils.router import router as utils_router
 from api.chats.router import router as chats_router
-from api.quizzes.router import router as quizzes_router
-
 async def lifespan(app: FastAPI):
     # Startup: Create database indexes
     await setup_indexes()
@@ -39,8 +37,6 @@ app.include_router(tutorials_router)
 app.include_router(notes_router)
 app.include_router(utils_router)
 app.include_router(chats_router)
-app.include_router(quizzes_router)
-
 @app.get("/", tags=["Health"])
 async def health_check():
     return {"status": "ok", "message": f"{settings.PROJECT_NAME} is running"}

@@ -15,7 +15,6 @@ This is the backend API for **Note Tube**, an AI-powered tutorial companion that
 - **Tutorials (`/tutorials`)**: Manage video tutorial sessions, sync YouTube videos with the user's workspace.
 - **Notes (`/notes`)**: Timestamped note-taking with support for multiple image attachments per note.
 - **Groups & Subgroups (`/groups`)**: Organize tutorials into folders/collections.
-- **Quizzes (`/quizzes`)**: AI-generated practice quizzes based on specific video timestamps and video transcripts.
 - **Chats (`/chats`)**: AI Chat Assistant that answers questions about the video content contextually.
 - **Utilities (`/utils`)**: AI-powered text rewriting ("Enhance with AI") and Speech-to-Text (STT) for voice notes.
 

@@ -6,8 +6,6 @@ from core.llm import chat_completion_with_fallback
 from core.prompts import TUTORIAL_AI_COMPANION_PROMPT
 from typing import List, Dict, Any
 import re
-from youtube_transcript_api import YouTubeTranscriptApi
-
 async def verify_tutorial_ownership(user_id: str, tutorial_id: str) -> dict:
     print(f"[Chats] Verifying ownership of tutorial {tutorial_id} for user {user_id}")
     tutorials = get_tutorial_collection()
@@ -20,101 +18,6 @@ async def verify_tutorial_ownership(user_id: str, tutorial_id: str) -> dict:
     if not tutorial:
         raise HTTPException(status_code=404, detail="Tutorial not found or permission denied")
     return tutorial
-
-def get_youtube_video_id(url: str) -> str:
-    """Extract YouTube video ID from URL."""
-    if not url:
-        return None
-    patterns = [
-        r'(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([^&]+)',
-        r'(?:https?:\/\/)?(?:www\.)?youtu\.be\/([^?]+)',
-        r'(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([^?]+)'
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, url)
-        if match:
-            return match.group(1)
-    return None
-
-def fetch_transcript(video_id: str) -> list:
-    """Fetch raw structured transcript using youtube-transcript-api."""
-    print(f"[Chats] Fetching transcript for video {video_id}")
-    try:
-        # Comprehensive list of common language codes to try (fallback cascade)
-        langs = ('en', 'hi', 'es', 'fr', 'de', 'ja', 'ko', 'ru', 'pt', 'it', 'zh-Hans', 'zh-Hant', 'ar', 'te', 'ta', 'mr', 'bn', 'gu', 'ur', 'ml', 'kn', 'en-US', 'en-GB')
-        
-        raw_transcript = None
-        
-        # In modern versions, it's a class method on YouTubeTranscriptApi
-        if hasattr(YouTubeTranscriptApi, 'get_transcript'):
-            raw_transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=langs)
-        else:
-            # In some versions, it requires instantiation
-            api_instance = YouTubeTranscriptApi() if callable(YouTubeTranscriptApi) else YouTubeTranscriptApi
-            if hasattr(api_instance, 'get_transcript'):
-                raw_transcript = api_instance.get_transcript(video_id, languages=langs)
-            # Fallback to fetch (often used in very old or alternative versions)
-            elif hasattr(api_instance, 'fetch'):
-                try:
-                    raw_transcript = api_instance.fetch(video_id, languages=langs)
-                except TypeError:
-                    # If fetch doesn't accept languages
-                    raw_transcript = api_instance.fetch(video_id)
-                    
-        if not raw_transcript:
-            return None
-            
-        # Normalize the result into a list of dicts
-        normalized = []
-        # If it's a FetchedTranscript object (has snippets attribute)
-        if hasattr(raw_transcript, 'snippets'):
-            for s in raw_transcript.snippets:
-                normalized.append({
-                    'text': getattr(s, 'text', ''),
-                    'start': getattr(s, 'start', 0.0),
-                    'duration': getattr(s, 'duration', 0.0)
-                })
-            return normalized
-            
-        # If it's already a list, ensure it's a list of dicts
-        if isinstance(raw_transcript, list):
-            for item in raw_transcript:
-                if hasattr(item, 'text'):
-                    normalized.append({
-                        'text': getattr(item, 'text', ''),
-                        'start': getattr(item, 'start', 0.0),
-                        'duration': getattr(item, 'duration', 0.0)
-                    })
-                elif isinstance(item, dict):
-                    normalized.append(item)
-            return normalized
-            
-        return raw_transcript
-    except Exception as e:
-        print(f"Transcript fetch error: {e}")
-        return None
-
-def extract_transcript_window(transcript_list: list, current_timestamp: float, window_minutes: int = 10) -> str:
-    """Extract transcript text from a time window around the current timestamp."""
-    if not transcript_list:
-        return ""
-        
-    if current_timestamp is None:
-        # If no timestamp, return the first 15000 chars as fallback
-        full_text = " ".join([t['text'] for t in transcript_list])
-        return full_text[:15000] + "... (truncated)"
-        
-    window_seconds = window_minutes * 60
-    start_time = max(0, current_timestamp - window_seconds)
-    end_time = current_timestamp + window_seconds
-    
-    window_text = []
-    for t in transcript_list:
-        # If the transcript segment falls within our window
-        if t['start'] + t.get('duration', 0) >= start_time and t['start'] <= end_time:
-            window_text.append(t['text'])
-            
-    return " ".join(window_text)
 
 from typing import Union
 
@@ -151,30 +54,6 @@ async def process_chat(user_id: str, tutorial_id: str, message: str, current_tim
     context_parts.append(f"Tutorial: {tutorial.get('title', 'Unknown')}")
     url = tutorial.get('url', 'Unknown')
     context_parts.append(f"Link: {url}")
-    
-    # Try fetching transcript from DB first (cache)
-    transcript = tutorial.get('transcript')
-    
-    if not transcript:
-        # Not in DB, fetch via network
-        video_id = get_youtube_video_id(url)
-        if video_id:
-            transcript = fetch_transcript(video_id)
-            if transcript:
-                # Save to database to cache it for all future chats!
-                tutorials = get_tutorial_collection()
-                await tutorials.update_one(
-                    {"_id": tutorial["_id"]},
-                    {"$set": {"transcript": transcript}}
-                )
-                
-                
-    if transcript:
-        # Extract only the relevant window if timestamp is provided
-        windowed_text = extract_transcript_window(transcript, current_timestamp)
-        if windowed_text:
-            context_parts.append(f"\nVideo Transcript Context (around {current_timestamp if current_timestamp else 'start'}s):\n{windowed_text}\n")
-            
     if notes_list:
         context_parts.append("\nNotes from the tutorial:")
         for note in notes_list:

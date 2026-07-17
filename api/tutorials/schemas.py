@@ -9,7 +9,6 @@ class TutorialCreate(BaseModel):
     title: str
     group_id: Optional[str] = None
     subgroup_id: Optional[str] = None
-
 class TutorialUpdate(BaseModel):
     title: Optional[str] = None
     group_id: Optional[str] = None
@@ -27,7 +26,6 @@ class TutorialResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     number_of_notes: int
-    number_of_quizzes: int
     group_id: Optional[str] = None
     subgroup_id: Optional[str] = None
 
