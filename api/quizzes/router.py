@@ -37,3 +37,12 @@ async def get_quizzes(
     """Retrieve paginated generated quizzes for a tutorial."""
     user_id = str(current_user["_id"])
     return await service.get_quizzes(user_id, tutorial_id, skip, limit)
+
+@router.get("/{quiz_id}", response_model=schemas.QuizResponse, status_code=status.HTTP_200_OK)
+async def get_quiz(
+    quiz_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Retrieve a single generated quiz by ID."""
+    user_id = str(current_user["_id"])
+    return await service.get_quiz(user_id, quiz_id)

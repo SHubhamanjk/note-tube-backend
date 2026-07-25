@@ -110,6 +110,8 @@ async def generate_quiz(user_id: str, tutorial_id: str, background_tasks: Backgr
         "tutorial_id": tutorial_id,
         "user_id": user_id,
         "questions": questions,
+        "from_timestamp": from_timestamp,
+        "to_timestamp": to_timestamp,
         "created_at": get_ist_now(),
         "status": "pending"
     }
@@ -223,3 +225,21 @@ async def get_quizzes(user_id: str, tutorial_id: str, skip: int = 0, limit: int 
         },
         "data": formatted
     }
+
+async def get_quiz(user_id: str, quiz_id: str) -> dict:
+    print(f"[Quizzes] Fetching quiz {quiz_id} for user {user_id}")
+    quizzes = get_quiz_collection()
+    try:
+        obj_id = ObjectId(quiz_id)
+    except:
+        raise HTTPException(status_code=400, detail="Invalid quiz ID")
+        
+    quiz = await quizzes.find_one({"_id": obj_id, "user_id": user_id})
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found")
+        
+    quiz["id"] = str(quiz["_id"])
+    if "created_at" in quiz and hasattr(quiz["created_at"], "isoformat"):
+        quiz["created_at"] = quiz["created_at"].isoformat()
+        
+    return quiz

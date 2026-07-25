@@ -34,6 +34,8 @@ class QuizResponse(BaseModel):
     tutorial_id: str
     questions: List[QuizQuestion]
     created_at: str
+    from_timestamp: Optional[str] = None
+    to_timestamp: Optional[str] = None
     status: str = "pending" # pending, completed
     evaluation: Optional[QuizEvaluationResponse] = None
     user_answers: Optional[List[QuizAnswer]] = None

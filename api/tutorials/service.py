@@ -161,7 +161,7 @@ async def get_tutorials(user_id: str, skip: int = 0, limit: int = 50, group_id: 
     tutorials = get_tutorial_collection()
     
     total = await tutorials.count_documents({"user_id": user_id})
-    cursor = tutorials.find({"user_id": user_id}).skip(skip).limit(limit)
+    cursor = tutorials.find({"user_id": user_id}).sort("created_at", -1).skip(skip).limit(limit)
     tutorial_docs = await cursor.to_list(length=limit)
     
     data = []
@@ -178,7 +178,7 @@ async def get_user_tutorials(user_id: str, skip: int = 0, limit: int = 10):
     tutorials = get_tutorial_collection()
     
     total = await tutorials.count_documents({"user_id": user_id})
-    cursor = tutorials.find({"user_id": user_id}).skip(skip).limit(limit)
+    cursor = tutorials.find({"user_id": user_id}).sort("created_at", -1).skip(skip).limit(limit)
     tutorial_docs = await cursor.to_list(length=limit)
     
     data = []
@@ -195,7 +195,7 @@ async def get_tutorials_by_group(group_id: str, skip: int = 0, limit: int = 10):
     tutorials = get_tutorial_collection()
     
     total = await tutorials.count_documents({"group_id": group_id})
-    cursor = tutorials.find({"group_id": group_id}).skip(skip).limit(limit)
+    cursor = tutorials.find({"group_id": group_id}).sort("created_at", -1).skip(skip).limit(limit)
     tutorial_docs = await cursor.to_list(length=limit)
     
     data = []
@@ -212,7 +212,7 @@ async def get_tutorials_by_subgroup(subgroup_id: str, skip: int = 0, limit: int 
     tutorials = get_tutorial_collection()
     
     total = await tutorials.count_documents({"subgroup_id": subgroup_id})
-    cursor = tutorials.find({"subgroup_id": subgroup_id}).skip(skip).limit(limit)
+    cursor = tutorials.find({"subgroup_id": subgroup_id}).sort("created_at", -1).skip(skip).limit(limit)
     tutorial_docs = await cursor.to_list(length=limit)
     
     data = []
