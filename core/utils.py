@@ -51,12 +51,12 @@ async def send_email(recipient: str, subject: str, body: str, html_body: str = N
 async def send_otp_email(recipient: str, otp: str, context: str = "login") -> bool:
     """Send OTP verification email for login or forgot password"""
     if context == "forgot_password":
-        subject = "Password Reset OTP - Medha.ai"
-        intro_text = "You requested to reset your password for your Medha.ai account."
+        subject = "Password Reset OTP - Note Tube"
+        intro_text = "You requested to reset your password for your Note Tube account."
         action_text = "If you didn't request this password reset, please ignore this email and your password will remain unchanged."
     else:
-        subject = "Login OTP - Medha.ai"
-        intro_text = "You requested to log in to your Medha.ai account."
+        subject = "Login OTP - Note Tube"
+        intro_text = "You requested to log in to your Note Tube account."
         action_text = "If you didn't request this login, please ignore this email."
 
     body = f"""
@@ -71,7 +71,7 @@ This OTP will expire in 2 minutes.
 {action_text}
 
 Best regards,
-Medha.ai Team
+Note Tube Team
 """
     
     html_body = f"""
@@ -91,7 +91,7 @@ Medha.ai Team
 <body>
     <div class="container">
         <div class="header">
-            <h1>Medha.ai Security</h1>
+            <h1>Note Tube Security</h1>
         </div>
         <div class="content">
             <p>Hello,</p>
@@ -102,10 +102,10 @@ Medha.ai Team
             </div>
             <p><strong>This OTP will expire in 2 minutes.</strong></p>
             <p>{action_text}</p>
-            <p>Best regards,<br>Medha.ai Team</p>
+            <p>Best regards,<br>Note Tube Team</p>
         </div>
         <div class="footer">
-            <p>© 2026 Medha.ai. All rights reserved.</p>
+            <p>© 2026 Note Tube. All rights reserved.</p>
         </div>
     </div>
 </body>

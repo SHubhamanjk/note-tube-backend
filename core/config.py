@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     
     # Email / SMTP
     SMTP_FROM_EMAIL: EmailStr
-    SMTP_FROM_NAME: str = "Medha.ai"
+    SMTP_FROM_NAME: str = "Note Tube"
     GMAIL_APP_PASSWORD: str
     
     # Groq API

@@ -83,8 +83,10 @@ async def initiate_forgot_password(forgot_in: schemas.ForgotPasswordInitiate):
     user = await users.find_one({"email": forgot_in.email})
     
     if not user:
-        # Don't reveal if user exists or not for security
-        return {"message": "If the email is registered, an OTP has been sent."}
+        raise HTTPException(
+            status_code=404, 
+            detail="No account registered with this email address."
+        )
         
     otp = generate_otp()
     otps = get_otp_collection()
@@ -96,7 +98,7 @@ async def initiate_forgot_password(forgot_in: schemas.ForgotPasswordInitiate):
     )
     
     await send_otp_email(forgot_in.email, otp, context="forgot_password")
-    return {"message": "If the email is registered, an OTP has been sent."}
+    return {"message": "OTP has been sent to your email address."}
 
 async def confirm_forgot_password(confirm_in: schemas.ForgotPasswordConfirm):
     otps = get_otp_collection()

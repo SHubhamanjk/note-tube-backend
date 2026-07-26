@@ -4,7 +4,12 @@ from core.config import settings
 from bson.codec_options import CodecOptions
 import pytz
 
-client = AsyncMongoClient(settings.MONGO_URI)
+client = AsyncMongoClient(
+    settings.MONGO_URI,
+    serverSelectionTimeoutMS=10000,
+    connectTimeoutMS=10000,
+    socketTimeoutMS=10000,
+)
 db = client.get_database(
     "note_tube_db",
     codec_options=CodecOptions(
