@@ -174,11 +174,18 @@ async def get_tutorials(user_id: str, skip: int = 0, limit: int = 50, group_id: 
         "data": data
     }
 
-async def get_user_tutorials(user_id: str, skip: int = 0, limit: int = 10):
+async def get_user_tutorials(user_id: str, skip: int = 0, limit: int = 10, search: str = None):
     tutorials = get_tutorial_collection()
     
-    total = await tutorials.count_documents({"user_id": user_id})
-    cursor = tutorials.find({"user_id": user_id}).sort("created_at", -1).skip(skip).limit(limit)
+    query = {"user_id": user_id}
+    if search:
+        query["$or"] = [
+            {"title": {"$regex": search, "$options": "i"}},
+            {"url": {"$regex": search, "$options": "i"}}
+        ]
+
+    total = await tutorials.count_documents(query)
+    cursor = tutorials.find(query).sort("created_at", -1).skip(skip).limit(limit)
     tutorial_docs = await cursor.to_list(length=limit)
     
     data = []
@@ -191,11 +198,18 @@ async def get_user_tutorials(user_id: str, skip: int = 0, limit: int = 10):
         "data": data
     }
 
-async def get_tutorials_by_group(group_id: str, skip: int = 0, limit: int = 10):
+async def get_tutorials_by_group(group_id: str, skip: int = 0, limit: int = 10, search: str = None):
     tutorials = get_tutorial_collection()
     
-    total = await tutorials.count_documents({"group_id": group_id})
-    cursor = tutorials.find({"group_id": group_id}).sort("created_at", -1).skip(skip).limit(limit)
+    query = {"group_id": group_id}
+    if search:
+        query["$or"] = [
+            {"title": {"$regex": search, "$options": "i"}},
+            {"url": {"$regex": search, "$options": "i"}}
+        ]
+
+    total = await tutorials.count_documents(query)
+    cursor = tutorials.find(query).sort("created_at", -1).skip(skip).limit(limit)
     tutorial_docs = await cursor.to_list(length=limit)
     
     data = []

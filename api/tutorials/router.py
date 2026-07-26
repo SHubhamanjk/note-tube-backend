@@ -17,10 +17,11 @@ async def create_tutorial(
 async def get_tutorials(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    search: str = Query(None),
     current_user: dict = Depends(get_current_user)
 ):
     user_id = str(current_user["_id"])
-    return await service.get_user_tutorials(user_id, skip, limit)
+    return await service.get_user_tutorials(user_id, skip, limit, search)
 
 @router.patch("/{tutorial_id}", status_code=status.HTTP_200_OK)
 async def update_tutorial(
@@ -56,9 +57,10 @@ async def get_tutorials_by_group(
     group_id: str,
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    search: str = Query(None),
     current_user: dict = Depends(get_current_user)
 ):
-    return await service.get_tutorials_by_group(group_id, skip, limit)
+    return await service.get_tutorials_by_group(group_id, skip, limit, search)
 
 @router.get("/subgroup/{subgroup_id}", response_model=schemas.PaginatedTutorials, status_code=status.HTTP_200_OK)
 async def get_tutorials_by_subgroup(
